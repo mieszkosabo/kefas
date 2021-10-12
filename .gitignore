@@ -1,6 +1,7 @@
 # local changelog cache (lerna-changelog)
 .changelog/
 
+npm_tests/*
 node_modules/
 lerna-debug.log
 npm-debug.log

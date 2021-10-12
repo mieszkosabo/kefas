@@ -5,7 +5,6 @@
   "repository": "https://github.com/mieszkosabo/kefas.git",
   "author": "Mieszko Sabo <mieszko.mac@gmail.com>",
   "license": "MIT",
-  "private": true,
   "workspaces": [
     "packages/*"
   ],

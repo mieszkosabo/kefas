@@ -13,6 +13,15 @@
     "node": "16.11.0",
     "yarn": "1.22.15"
   },
+  "scripts": {
+    "build": "scripty",
+    "test": "scripty",
+    "lint": "scripty",
+    "clean": "scripty"
+  },
+  "scripty": {
+    "path": "./scripts/workspace"
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
@@ -26,6 +35,7 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "lerna": "^4.0.0",
     "prettier": "^2.4.1",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "scripty": "^2.0.0"
   }
 }

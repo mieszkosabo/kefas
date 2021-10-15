@@ -9,8 +9,8 @@
       "noUnusedParameters": true,
       "noImplicitReturns": true,
       "declaration": true,
+      "jsx": "react",
       "outDir": "dist",
       "rootDir": "src"
     }
   }
-  

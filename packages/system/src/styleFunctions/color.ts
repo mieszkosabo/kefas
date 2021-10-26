@@ -25,4 +25,5 @@ export type ColorProps = Partial<{
   bg: Token<CSSTypes.Properties["color"], "colors">;
   opacity: Token<CSSTypes.Properties["opacity"], "opacities">;
 }>;
+
 export const color = system(config);

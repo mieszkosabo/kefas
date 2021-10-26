@@ -2,7 +2,6 @@ import {
   BackgroundProps,
   BorderProps,
   ColorProps,
-  FlexboxProps,
   GridProps,
   LayoutProps,
   PositionProps,

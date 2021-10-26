@@ -40,13 +40,12 @@ export const Box = (props: BoxProps) => (
   <BoxWrapper m={0} minW={0} {...(props as any)} />
 );
 
+// TODO: delete this
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const test = () => (
   <Box
     color={["plum", "yellow"]}
     opacity={0.1}
-    align="normal"
-    justify="normal"
     bg={["papayawhip", "peru"]}
     key="elo"
   />

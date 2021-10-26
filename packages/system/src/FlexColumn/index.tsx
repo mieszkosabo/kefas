@@ -1,7 +1,7 @@
 import * as React from "react";
+import { FlexProps } from "..";
 import { Flex } from "../Flex";
 
-// FIXME: proper types
-export const FlexCloumn = (props: any) => (
+export const FlexCloumn = (props: FlexProps) => (
   <Flex direction="column" {...props} />
 );

@@ -37,7 +37,7 @@ const config: Config = {
   },
 };
 
-export type FlexProps = Partial<{
+export type FlexboxProps = Partial<{
   alignItems: Token<CSSTypes.Property.AlignItems>;
   align: Token<CSSTypes.Property.AlignItems>;
 

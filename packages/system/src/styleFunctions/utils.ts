@@ -12,6 +12,9 @@ export const transformRawValueToPixelOrPercent = (
     if (!isNumber(n)) {
       return n;
     } else {
+      if (n === 0) {
+        return n;
+      }
       return n > 1 ? `${n}px` : n * 100 + "%";
     }
   }

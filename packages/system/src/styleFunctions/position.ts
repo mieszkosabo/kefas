@@ -1,8 +1,36 @@
 import { Token } from "@kefas-ui/theming";
+import { system, Config } from "styled-system";
 import * as CSSTypes from "csstype";
-export { position } from "styled-system";
+import { transformRawValueToPixelOrPercent } from "./utils";
 
-// TODO: add convertion from numbers to px
+export const positionConfig: Config = {
+  position: true,
+  zIndex: {
+    property: "zIndex",
+    scale: "zIndices",
+  },
+  top: {
+    property: "top",
+    scale: "sizes",
+    transform: transformRawValueToPixelOrPercent,
+  },
+  right: {
+    property: "right",
+    scale: "sizes",
+    transform: transformRawValueToPixelOrPercent,
+  },
+  bottom: {
+    property: "bottom",
+    scale: "sizes",
+    transform: transformRawValueToPixelOrPercent,
+  },
+  left: {
+    property: "left",
+    scale: "sizes",
+    transform: transformRawValueToPixelOrPercent,
+  },
+};
+
 export type PositionProps = Partial<{
   position: Token<CSSTypes.Property.Position>;
   zIndex: Token<CSSTypes.Property.ZIndex, "zIndices">;
@@ -11,3 +39,5 @@ export type PositionProps = Partial<{
   bottom: Token<CSSTypes.Property.Bottom, "space">;
   left: Token<CSSTypes.Property.Left, "space">;
 }>;
+
+export const position = system(positionConfig);

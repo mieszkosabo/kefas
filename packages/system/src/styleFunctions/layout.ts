@@ -43,23 +43,23 @@ layoutConfig.maxH = layoutConfig.maxHeight;
 layoutConfig.minH = layoutConfig.minHeight;
 
 export type LayoutProps = Partial<{
-  width: Token<CSSTypes.Property.Width, "sizes">;
-  w: Token<CSSTypes.Property.Width, "sizes">;
+  width: Token<CSSTypes.Property.Width | number, "sizes">;
+  w: Token<CSSTypes.Property.Width | number, "sizes">;
 
-  height: Token<CSSTypes.Property.Height, "sizes">;
-  h: Token<CSSTypes.Property.Height, "sizes">;
+  height: Token<CSSTypes.Property.Height | number, "sizes">;
+  h: Token<CSSTypes.Property.Height | number, "sizes">;
 
-  minWidth: Token<CSSTypes.Property.MinWidth, "sizes">;
-  minW: Token<CSSTypes.Property.MinWidth, "sizes">;
+  minWidth: Token<CSSTypes.Property.MinWidth | number, "sizes">;
+  minW: Token<CSSTypes.Property.MinWidth | number, "sizes">;
 
-  maxWidth: Token<CSSTypes.Property.MaxWidth, "sizes">;
-  maxW: Token<CSSTypes.Property.MaxWidth, "sizes">;
+  maxWidth: Token<CSSTypes.Property.MaxWidth | number, "sizes">;
+  maxW: Token<CSSTypes.Property.MaxWidth | number, "sizes">;
 
-  minHeight: Token<CSSTypes.Property.MinHeight, "sizes">;
-  minH: Token<CSSTypes.Property.MinHeight, "sizes">;
+  minHeight: Token<CSSTypes.Property.MinHeight | number, "sizes">;
+  minH: Token<CSSTypes.Property.MinHeight | number, "sizes">;
 
-  maxHeight: Token<CSSTypes.Property.MaxHeight, "sizes">;
-  maxH: Token<CSSTypes.Property.MaxHeight, "sizes">;
+  maxHeight: Token<CSSTypes.Property.MaxHeight | number, "sizes">;
+  maxH: Token<CSSTypes.Property.MaxHeight | number, "sizes">;
 }>;
 
 export const layout = system(layoutConfig);

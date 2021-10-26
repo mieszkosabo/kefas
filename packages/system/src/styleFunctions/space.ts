@@ -2,7 +2,6 @@ import { Token } from "@kefas-ui/theming";
 import * as CSSTypes from "csstype";
 export { space } from "styled-system";
 
-// TODO: test if numbers get converted to px
 export type SpaceProps = Partial<{
   margin: Token<CSSTypes.Property.Margin | number, "space">;
   m: Token<CSSTypes.Property.Margin | number, "space">;

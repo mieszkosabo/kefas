@@ -1,4 +1,4 @@
-import { layout, flexbox } from "../../src/styleFunctions";
+import { layout, flexbox, position } from "../../src/styleFunctions";
 
 describe("layout tests", () => {
   it("numbers > 1 get turned to pixels", () => {
@@ -18,6 +18,16 @@ describe("layout tests", () => {
       })
     ).toEqual({
       width: "50%",
+    });
+  });
+
+  it("doesn't add units to 0", () => {
+    expect(
+      layout({
+        width: 0,
+      })
+    ).toEqual({
+      width: 0,
     });
   });
 
@@ -80,6 +90,18 @@ describe("flexbox tests", () => {
       flexGrow: 1,
       flexBasis: "auto",
       flexShrink: 2,
+    });
+  });
+});
+
+describe("Position tests", () => {
+  it("converts raw numbers to px", () => {
+    expect(
+      position({
+        left: 23,
+      })
+    ).toEqual({
+      left: "23px",
     });
   });
 });

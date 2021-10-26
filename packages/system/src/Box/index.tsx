@@ -21,8 +21,6 @@ export interface BoxProps
 
 const BoxWrapper = styled.div.attrs<BoxProps>((props_) => ({
   boxSizing: "border-box",
-  margin: 0,
-  minWidth: 0,
   ...props_,
 }))`
   ${compose(
@@ -38,8 +36,11 @@ const BoxWrapper = styled.div.attrs<BoxProps>((props_) => ({
   )}
 `;
 
-export const Box = (props: BoxProps) => <BoxWrapper {...(props as any)} />;
+export const Box = (props: BoxProps) => (
+  <BoxWrapper m={0} minW={0} {...(props as any)} />
+);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const test = () => (
   <Box
     color={["plum", "yellow"]}
@@ -50,5 +51,3 @@ const test = () => (
     key="elo"
   />
 );
-
-console.log(test);

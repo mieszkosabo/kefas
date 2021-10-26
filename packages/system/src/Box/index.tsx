@@ -1,3 +1,4 @@
+import * as React from "react";
 import styled from "styled-components";
 import {
   color,
@@ -7,16 +8,22 @@ import {
   grid,
   border,
   position,
-  background,
   shadow,
   layout,
 } from "../styleFunctions";
+import { background } from "..";
+import { KefasBaseProps } from "../kefasProps";
 
-export const Box = styled.div.attrs((props) => ({
+export interface BoxProps
+  extends KefasBaseProps,
+    Partial<Omit<React.HTMLProps<HTMLDivElement>, keyof KefasBaseProps>> {}
+// TODO: ogarnąć "as" propa
+
+const BoxWrapper = styled.div.attrs<BoxProps>((props_) => ({
   boxSizing: "border-box",
   margin: 0,
   minWidth: 0,
-  ...props,
+  ...props_,
 }))`
   ${compose(
     color,
@@ -30,3 +37,18 @@ export const Box = styled.div.attrs((props) => ({
     layout
   )}
 `;
+
+export const Box = (props: BoxProps) => <BoxWrapper {...(props as any)} />;
+
+const test = () => (
+  <Box
+    color={["plum", "yellow"]}
+    opacity={0.1}
+    align="normal"
+    justify="normal"
+    bg={["papayawhip", "peru"]}
+    key="elo"
+  />
+);
+
+console.log(test);

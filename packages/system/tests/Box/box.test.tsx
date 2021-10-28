@@ -34,4 +34,33 @@ describe("Box tests", () => {
     expect(el).toHaveStyle("margin-top: 15px");
     expect(el).toHaveStyle("padding-left: 15px");
   });
+
+  it("renders as different html elements when as props is provided", () => {
+    const { getByText } = render(
+      <Box as="button" w={100} mt={15} pl={15}>
+        hello
+      </Box>
+    );
+    const el = getByText("hello");
+    expect(el.nodeName).toBe("BUTTON");
+  });
+
+  // it("forwards refs", () => {
+  //   let a;
+  //   const { getByText } = render(
+  //     <Box
+  //       as="button"
+  //       ref={(e) => {
+  //         a = "ayo";
+  //       }}
+  //     >
+  //       hello
+  //     </Box>
+  //   );
+  //   const el = getByText("hello");
+  //   console.log(a);
+  //   expect(a).toBe("ayo");
+  // });
 });
+
+// TODO: test ref passing

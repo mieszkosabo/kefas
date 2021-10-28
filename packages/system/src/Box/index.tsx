@@ -13,13 +13,9 @@ import {
 } from "../styleFunctions";
 import { background } from "..";
 import { KefasBaseProps } from "../kefasProps";
+import type { As } from "@kefas-ui/theming";
 
-export interface BoxProps
-  extends KefasBaseProps,
-    Partial<Omit<React.HTMLProps<HTMLDivElement>, keyof KefasBaseProps>> {}
-// TODO: ogarnąć "as" propa
-
-const BoxWrapper = styled.div.attrs<BoxProps>((props_) => ({
+const BoxWrapper = styled.div.attrs((props_) => ({
   boxSizing: "border-box",
   ...props_,
 }))`
@@ -36,17 +32,24 @@ const BoxWrapper = styled.div.attrs<BoxProps>((props_) => ({
   )}
 `;
 
-export const Box = (props: BoxProps) => (
-  <BoxWrapper m={0} minW={0} {...(props as any)} />
-);
+export type BoxProps<T extends React.ElementType = "div"> = As<T> &
+  KefasBaseProps &
+  React.ComponentPropsWithoutRef<T>;
 
-// TODO: delete this
+export const Box = <T extends React.ElementType = "div">(
+  props: BoxProps<T>
+) => <BoxWrapper m={0} minW={0} {...(props as any)} />;
+
+// TODO: delete everything below this
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const test = () => (
-  <Box
-    color={["plum", "yellow"]}
-    opacity={0.1}
-    bg={["papayawhip", "peru"]}
-    key="elo"
-  />
+  <Box as="img" m={2} src="elo" key="elo" onClick={() => {}} />
+);
+
+interface CoolButton extends BoxProps {
+  color: string;
+}
+
+const Btn = (props: CoolButton) => (
+  <Box as="img" key="yto" src="aaa" {...props} />
 );

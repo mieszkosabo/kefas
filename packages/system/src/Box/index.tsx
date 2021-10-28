@@ -15,6 +15,7 @@ import { background } from "..";
 import { HTMLKefasProps, KefasComponent } from "../types";
 
 const BoxWrapper = styled.div`
+  box-sizing: border-box;
   ${compose(
     color,
     space,

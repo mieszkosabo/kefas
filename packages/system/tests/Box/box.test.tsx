@@ -45,22 +45,27 @@ describe("Box tests", () => {
     expect(el.nodeName).toBe("BUTTON");
   });
 
-  // it("forwards refs", () => {
-  //   let a;
-  //   const { getByText } = render(
-  //     <Box
-  //       as="button"
-  //       ref={(e) => {
-  //         a = "ayo";
-  //       }}
-  //     >
-  //       hello
-  //     </Box>
-  //   );
-  //   const el = getByText("hello");
-  //   console.log(a);
-  //   expect(a).toBe("ayo");
-  // });
+  it("forwards refs", () => {
+
+    let a;
+    const TestCase = () => {
+      const ref = React.useRef<HTMLImageElement>();
+      React.useEffect(() => {
+        a = ref.current;
+      }, [ref.current]);
+
+      return (
+        <Box as="img" w="100px" ref={ref}/>
+      )
+
+    }
+
+    render(
+      <TestCase />
+    );
+    console.log(a);
+    expect(a).toBe("ayo");
+  });
 });
 
 // TODO: test ref passing

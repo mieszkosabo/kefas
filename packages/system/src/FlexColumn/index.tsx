@@ -2,6 +2,6 @@ import * as React from "react";
 import { FlexProps } from "..";
 import { Flex } from "../Flex";
 
-export const FlexCloumn = (props: FlexProps) => (
+export const FlexColumn = (props: FlexProps) => (
   <Flex direction="column" {...props} />
 );

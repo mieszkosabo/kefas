@@ -1,4 +1,3 @@
-// import * as React from "react";
 import { ThemeTypings } from "./theme.types";
 
 export type ResponsiveArray<T> = Array<T>;
@@ -12,7 +11,3 @@ export type Token<
 > = ThemeKey extends keyof ThemeTypings
   ? ResponsiveValue<CSSType | ThemeTypings[ThemeKey]>
   : ResponsiveValue<CSSType>;
-
-export type As<T> = {
-  as?: T;
-};

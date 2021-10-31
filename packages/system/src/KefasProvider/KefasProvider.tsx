@@ -1,6 +1,7 @@
 import { SanitizeCSS } from "@kefas-ui/sanitize-css";
 import * as React from "react";
-import { createGlobalStyle, ThemeProvider } from "styled-components";
+import { ThemeProvider } from "styled-components";
+import { Global } from "./Global";
 
 export type KefasProviderProps = {
   sanitize?: boolean;
@@ -13,14 +14,12 @@ export const KefasProvider = ({
   theme,
   children,
 }: KefasProviderProps) => {
-  const globalStyles = theme?.global;
-  const GlobalStyles =
-    globalStyles != null ? createGlobalStyle(globalStyles) : null;
-  console.log(globalStyles);
+  const globals = theme?.global;
+
   return (
     <ThemeProvider theme={theme}>
       {sanitize && <SanitizeCSS />}
-      {GlobalStyles != null && <GlobalStyles />}
+      <Global globals={globals} theme={theme} />
       {children}
     </ThemeProvider>
   );

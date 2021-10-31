@@ -1,32 +1,11 @@
 import * as React from "react";
 import styled from "styled-components";
-import {
-  color,
-  compose,
-  space,
-  typography,
-  grid,
-  border,
-  position,
-  shadow,
-  layout,
-} from "../styleFunctions";
-import { background } from "..";
+import { composedStyleFunctions } from "..";
 import { HTMLKefasProps, KefasComponent } from "../types";
 
 const BoxWrapper = styled.div`
   box-sizing: border-box;
-  ${compose(
-    color,
-    space,
-    typography,
-    grid,
-    background,
-    border,
-    position,
-    shadow,
-    layout
-  )}
+  ${composedStyleFunctions}
 `;
 
 export type BoxProps = HTMLKefasProps<"div">;

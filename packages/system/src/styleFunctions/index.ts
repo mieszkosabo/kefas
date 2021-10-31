@@ -9,3 +9,4 @@ export * from "./grid";
 export * from "./border";
 export * from "./position";
 export * from "./shadow";
+export * from "./composedStyleFunctions";

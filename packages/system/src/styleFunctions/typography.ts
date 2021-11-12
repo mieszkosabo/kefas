@@ -4,7 +4,7 @@ export { typography } from "styled-system";
 
 export type TypographyProps = Partial<{
   fontFamily: Token<CSSTypes.Property.FontFamily, "fonts">;
-  fontSize: Token<CSSTypes.Property.FontSize, "fontSizes">;
+  fontSize: Token<CSSTypes.Property.FontSize | number, "fontSizes">;
   fontWeight: Token<CSSTypes.Property.FontWeight, "fontWeights">;
   lineHeight: Token<CSSTypes.Property.LineHeight, "lineHeights">;
   letterSpacing: Token<CSSTypes.Property.LetterSpacing, "letterSpacings">;

@@ -7,3 +7,7 @@ export default {
 };
 
 export const Example = () => <Box w="100px" h="100px" bg="palevioletred" />;
+
+export const responsiveExample = () => (
+  <Box w="100px" h="100px" bg={["red", "green", "blue"]} />
+);

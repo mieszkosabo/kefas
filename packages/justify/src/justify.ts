@@ -22,7 +22,7 @@ const computeFitnessClass = (ratio: number): FitnessClass => {
 // WORK IN PROGRESS
 export const justify = (input: Paragraph, paragraphLength: number) => {
   const m = input.length;
-  const activeNode = new Node(0, 0, 1, 0, 0, 0, 0, null, null);
+  let activeNode = new Node(0, 0, 1, 0, 0, 0, 0, null, null);
   const globalSums = {
     width: 0,
     stretch: 0,
@@ -32,7 +32,7 @@ export const justify = (input: Paragraph, paragraphLength: number) => {
   const computeRatio = (node: Node, spec: Specification): number => {
     const L = globalSums.width - node.totalWidth;
     const lineLength = spec.type === "penalty" ? L + spec.width : L;
-
+    console.log({ L, lineLength });
     if (lineLength === paragraphLength) {
       return 0;
     }
@@ -83,6 +83,28 @@ export const justify = (input: Paragraph, paragraphLength: number) => {
     return [demetris, fitnessClass];
   };
 
+  const computeTotals = (startIdx: number) => {
+    const totals = {
+      tw: globalSums.width,
+      ty: globalSums.stretch,
+      tz: globalSums.shrink,
+    };
+    for (let i = startIdx; i < m; i++) {
+      const currSpec = input[i];
+      if (currSpec.type === "box") {
+        break;
+      }
+      if (currSpec.type === "glue") {
+        totals.tw += currSpec.width;
+        totals.ty += currSpec.stretchability;
+        totals.tz += currSpec.shrinkability;
+      } else if (currSpec.penalty === -Infinity && i > startIdx) {
+        break;
+      }
+    }
+    return totals;
+  };
+
   const mainLoop = (spec: Specification, idx: number) => {
     let currentActiveNode: Node | null = activeNode;
     let preva: Node | null = null;
@@ -100,6 +122,7 @@ export const justify = (input: Paragraph, paragraphLength: number) => {
       inner: while (currentActiveNode != null) {
         const nexta: Node | null = currentActiveNode.next;
         const currentLine = currentActiveNode.line + 1;
+        console.log(idx);
         const ratio = computeRatio(currentActiveNode, spec);
 
         if (shouldRemoveNode(ratio, spec)) {
@@ -134,7 +157,30 @@ export const justify = (input: Paragraph, paragraphLength: number) => {
       }
 
       if (bestDemetris < Infinity) {
-        // TODO: insert new active nodes for breaks from Ac to b
+        // insert new active nodes for breaks from Ac to b
+        const { tw, ty, tz } = computeTotals(idx);
+        for (let fitnessClass = 0; fitnessClass <= 3; fitnessClass += 1) {
+          const dc = demetria[fitnessClass];
+          if (dc <= bestDemetris + FLAGGED_COST) {
+            const newNode = new Node(
+              idx,
+              bestActiveNodes[fitnessClass]!.line + 1,
+              fitnessClass as FitnessClass,
+              tw,
+              ty,
+              tz,
+              dc,
+              currentActiveNode,
+              bestActiveNodes[fitnessClass]
+            );
+            if (preva == null) {
+              activeNode = newNode;
+            } else {
+              preva.next = newNode;
+            }
+            preva = newNode;
+          }
+        }
       }
     }
   };
@@ -156,8 +202,28 @@ export const justify = (input: Paragraph, paragraphLength: number) => {
         mainLoop(currEl, b);
       }
     }
-
-    // TODO: choosing breakpoints
   }
-  return input; // TODO:
+  const result = [];
+  let d = Infinity;
+  let a: Node | null = activeNode;
+  let best: Node | null = activeNode;
+  while (true) {
+    console.log(a);
+    a = a.next;
+    if (a == null) {
+      break;
+    }
+    if (a.totalDemerits < d) {
+      d = a.totalDemerits;
+      best = a;
+    }
+  }
+
+  while (best != null) {
+    result.push({ position: best.position }); // TODO: add ratios prolly
+    best = best.previous;
+  }
+  result.reverse();
+  console.log(globalSums);
+  return result;
 };

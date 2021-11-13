@@ -1,29 +1,23 @@
 import * as React from "react";
-import { transformTextToSpecifications } from ".";
-import { WidthsMap } from "./Justified";
+import { justify } from "./justify";
 
 export type UseJustifiedTextArgs = {
   text: string;
-  widths: WidthsMap | null;
 };
 
 type UseJustifiedTextType = (args: UseJustifiedTextArgs) => {
-  html?: React.ReactNode;
+  lines: string[] | null;
   isJustified: boolean;
 };
 
-export const useJustifiedText: UseJustifiedTextType = ({ text, widths }) => {
-  const [html, setHtml] = React.useState<React.ReactNode | null>(null);
+export const useJustifiedText: UseJustifiedTextType = ({ text }) => {
+  const [lines, setLines] = React.useState<string[] | null>(null);
   React.useEffect(() => {
-    if (widths != null) {
-      const specifications = transformTextToSpecifications(text, widths);
-      console.log(JSON.stringify(specifications));
-      // setHtml(justifed);
-    }
-  }, [text, widths]);
+    setLines(justify(text, 320 / 7.8125));
+  }, [text]);
 
   return {
-    isJustified: html != null,
-    html: "justifued " + text,
+    isJustified: lines != null,
+    lines,
   };
 };

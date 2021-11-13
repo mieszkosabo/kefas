@@ -22,6 +22,7 @@ export const CalculateWidths = React.memo<CalculateWidthProps>(
       fontStyle
     } = textProps;
     React.useLayoutEffect(() => {
+      console.log(widths);
       setWidths(widths);
     }, []);
 

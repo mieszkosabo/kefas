@@ -1,229 +1,98 @@
-import { FitnessClass, Node, Paragraph, Specification } from "./types";
+// WORKS ONLY FOR MONOTYPES WITHOUT HYPHENS
 
-const TRESHOLD = 2;
-const FLAGGED_COST = 50;
-const FITNESS_COST = 3000;
-
-const shouldRemoveNode = (ratio: number, spec: Specification) =>
-  ratio < -1 || (spec.type === "penalty" && spec.penalty === -Infinity);
-
-const computeFitnessClass = (ratio: number): FitnessClass => {
-  if (ratio < -0.5) {
-    return 0;
-  } else if (ratio <= 0.5) {
-    return 1;
-  } else if (ratio <= 1) {
-    return 2;
-  } else {
-    return 3;
-  }
+type PossibleLineBreak = {
+  first: number;
+  last: number;
+  next: number;
+  score: number;
 };
-// implementation of the Kunth-Plass line breaking algorithm
-// WORK IN PROGRESS
-export const justify = (input: Paragraph, paragraphLength: number) => {
-  const m = input.length;
-  let activeNode = new Node(0, 0, 1, 0, 0, 0, 0, null, null);
-  const globalSums = {
-    width: 0,
-    stretch: 0,
-    shrink: 0,
-  };
 
-  const computeRatio = (node: Node, spec: Specification): number => {
-    const L = globalSums.width - node.totalWidth;
-    const lineLength = spec.type === "penalty" ? L + spec.width : L;
-    console.log({ L, lineLength });
-    if (lineLength === paragraphLength) {
-      return 0;
+const SPACE = 1;
+
+const textToPossibleLineBreaks = (text: string): PossibleLineBreak[] => {
+  const result: PossibleLineBreak[] = [];
+  let idx = 0;
+  while (idx < text.length) {
+    while (idx < text.length && text[idx] === " ") {
+      idx += 1;
     }
-    if (lineLength < paragraphLength) {
-      const Y = globalSums.stretch - node.totalStretch;
-      return Y > 0 ? (paragraphLength - lineLength) / Y : Infinity;
-    } else {
-      const Z = globalSums.shrink - node.totalShrink;
-      return Z > 0 ? (paragraphLength - lineLength) / Z : Infinity;
+    const start = idx;
+    while (idx < text.length && !(text[idx] === " ")) {
+      idx += 1;
     }
-  };
-
-  const computeDemetrisAndFitnessClass = (
-    node: Node,
-    ratio: number,
-    spec: Specification
-  ): [demetris: number, fitnessClass: FitnessClass] => {
-    let demetris: number;
-    if (spec.type === "penalty" && spec.penalty > 0) {
-      demetris = Math.pow(
-        1 + 100 * Math.pow(Math.abs(ratio), 3) + spec.penalty,
-        2
-      );
-    } else if (spec.type === "penalty" && spec.penalty !== -Infinity) {
-      demetris =
-        Math.pow(1 + 100 * Math.pow(Math.abs(ratio), 3), 2) -
-        Math.pow(spec.penalty, 2);
-    } else {
-      demetris = Math.pow(1 + 100 * Math.pow(Math.abs(ratio), 3), 2);
-    }
-
-    const nodeAtPos = input[node.position];
-    if (
-      spec.type === "penalty" &&
-      spec.flagged &&
-      nodeAtPos.type === "penalty" &&
-      nodeAtPos.flagged
-    ) {
-      demetris += FLAGGED_COST;
-    }
-
-    const fitnessClass = computeFitnessClass(ratio);
-
-    if (Math.abs(fitnessClass - node.fitness) > 1) {
-      demetris += FITNESS_COST;
-    }
-
-    return [demetris, fitnessClass];
-  };
-
-  const computeTotals = (startIdx: number) => {
-    const totals = {
-      tw: globalSums.width,
-      ty: globalSums.stretch,
-      tz: globalSums.shrink,
-    };
-    for (let i = startIdx; i < m; i++) {
-      const currSpec = input[i];
-      if (currSpec.type === "box") {
-        break;
-      }
-      if (currSpec.type === "glue") {
-        totals.tw += currSpec.width;
-        totals.ty += currSpec.stretchability;
-        totals.tz += currSpec.shrinkability;
-      } else if (currSpec.penalty === -Infinity && i > startIdx) {
-        break;
-      }
-    }
-    return totals;
-  };
-
-  const mainLoop = (spec: Specification, idx: number) => {
-    let currentActiveNode: Node | null = activeNode;
-    let preva: Node | null = null;
-
-    outer: while (currentActiveNode != null) {
-      const demetria = [
-        Infinity, // D_0
-        Infinity, // D_1
-        Infinity, // D_2
-        Infinity, // D_3
-      ];
-      const bestActiveNodes: (Node | null)[] = [null, null, null, null];
-      let bestDemetris = -Infinity;
-
-      inner: while (currentActiveNode != null) {
-        const nexta: Node | null = currentActiveNode.next;
-        const currentLine = currentActiveNode.line + 1;
-        console.log(idx);
-        const ratio = computeRatio(currentActiveNode, spec);
-
-        if (shouldRemoveNode(ratio, spec)) {
-          currentActiveNode = currentActiveNode.remove();
-        } else {
-          preva = currentActiveNode;
-        }
-        if (ratio >= -1 && ratio <= TRESHOLD) {
-          const [demetris, currentFitness] = computeDemetrisAndFitnessClass(
-            currentActiveNode as Node, // FIXME:
-            ratio,
-            spec
-          );
-
-          if (demetris < demetria[currentFitness]) {
-            demetria[currentFitness] = demetris;
-            bestActiveNodes[currentFitness] = currentActiveNode;
-            if (demetris < bestDemetris) {
-              bestDemetris = demetris;
-            }
-          }
-        }
-
-        currentActiveNode = nexta;
-
-        if (
-          currentActiveNode != null &&
-          currentActiveNode.line >= currentLine
-        ) {
-          break inner;
-        }
-      }
-
-      if (bestDemetris < Infinity) {
-        // insert new active nodes for breaks from Ac to b
-        const { tw, ty, tz } = computeTotals(idx);
-        for (let fitnessClass = 0; fitnessClass <= 3; fitnessClass += 1) {
-          const dc = demetria[fitnessClass];
-          if (dc <= bestDemetris + FLAGGED_COST) {
-            const newNode = new Node(
-              idx,
-              bestActiveNodes[fitnessClass]!.line + 1,
-              fitnessClass as FitnessClass,
-              tw,
-              ty,
-              tz,
-              dc,
-              currentActiveNode,
-              bestActiveNodes[fitnessClass]
-            );
-            if (preva == null) {
-              activeNode = newNode;
-            } else {
-              preva.next = newNode;
-            }
-            preva = newNode;
-          }
-        }
-      }
-    }
-  };
-
-  for (let b = 0; b < m; b++) {
-    const currEl = input[b];
-
-    if (currEl.type === "box") {
-      globalSums.width += currEl.width;
-    } else if (currEl.type === "glue") {
-      if (input[b - 1].type === "box") {
-        mainLoop(currEl, b);
-      }
-      globalSums.width += currEl.width;
-      globalSums.stretch += currEl.stretchability;
-      globalSums.shrink += currEl.shrinkability;
-    } else {
-      if (currEl.penalty !== Infinity) {
-        mainLoop(currEl, b);
-      }
+    if (start < idx) {
+      result.push({ first: start, last: idx, next: -1, score: -1 });
     }
   }
-  const result = [];
-  let d = Infinity;
-  let a: Node | null = activeNode;
-  let best: Node | null = activeNode;
-  while (true) {
-    console.log(a);
-    a = a.next;
-    if (a == null) {
+  result.push({ first: -1, last: -1, next: -1, score: 0 });
+  return result;
+};
+
+const KnuthPlass = (
+  possibleBreaks: PossibleLineBreak[],
+  idx: number,
+  idealWidth: number,
+  maxWidth: number
+): void => {
+  let jdx = idx + 1;
+  let currLineLength = possibleBreaks[idx].last - possibleBreaks[idx].first;
+  let bestScore = Math.pow(idealWidth - currLineLength, 2);
+  let bestTail = jdx;
+
+  while (jdx < possibleBreaks.length) {
+    const wordWidth = possibleBreaks[jdx].last - possibleBreaks[jdx].first;
+    if (currLineLength + wordWidth >= maxWidth) {
+      // do we need ge?
       break;
     }
-    if (a.totalDemerits < d) {
-      d = a.totalDemerits;
-      best = a;
+    const lineScore = Math.pow(idealWidth - (currLineLength + wordWidth), 2);
+    currLineLength += wordWidth + SPACE;
+
+    if (possibleBreaks[jdx].score === -1) {
+      KnuthPlass(possibleBreaks, jdx, idealWidth, maxWidth);
     }
+
+    if (lineScore + possibleBreaks[jdx].score < bestScore) {
+      bestScore = lineScore + possibleBreaks[jdx].score;
+      bestTail = jdx;
+    }
+
+    jdx++;
   }
 
-  while (best != null) {
-    result.push({ position: best.position }); // TODO: add ratios prolly
-    best = best.previous;
+  possibleBreaks[idx].score = bestScore;
+  possibleBreaks[idx].next = bestTail;
+
+  if (possibleBreaks[idx].next + 1 === possibleBreaks.length) {
+    // last paragraph doesn't contribute to score
+    possibleBreaks[idx].score = 0;
   }
-  result.reverse();
-  console.log(globalSums);
+};
+
+const getLines = (text: string, breaks: PossibleLineBreak[]): string[] => {
+  const result = [];
+  let idx = 0;
+
+  while (idx < breaks.length && idx !== -1) {
+    const next = breaks[idx].next;
+    let line = "";
+
+    for (let i = idx; i <= next && i + 1 < breaks.length; i++) {
+      if (breaks[i].last - breaks[i].first <= 0) {
+        break;
+      }
+      line += i === idx ? "" : " ";
+      line += text.substr(breaks[i].first, breaks[i].last - breaks[i].first);
+    }
+    result.push(line);
+    idx = breaks[idx].next;
+  }
   return result;
+};
+
+export const justify = (text: string, paragraphWidth: number) => {
+  const breaks = textToPossibleLineBreaks(text);
+  KnuthPlass(breaks, 0, paragraphWidth, paragraphWidth);
+  console.log(getLines(text, breaks));
+  return getLines(text, breaks);
 };

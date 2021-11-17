@@ -11,9 +11,9 @@ export type Config = {
 
 const defaultConfig: Config = {
   maxAdjustmentRatio: 2.0,
-  initialMaxAdjustmentRatio: 0.3,
+  initialMaxAdjustmentRatio: 1,
   doubleHyphenPenalty: 0,
-  contrastingTightnessPenalty: 0, // maybe larger
+  contrastingTightnessPenalty: 50,
 };
 
 export const InfPenalty = 1024;

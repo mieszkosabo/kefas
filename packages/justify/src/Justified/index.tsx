@@ -22,16 +22,18 @@ export const Justified = ({ children, ...props }: JustifiedProps) => {
               console.log(lineWordSpacing);
               console.log(text);
               return (
-                <span
-                  key={idx}
-                  style={{
-                    display: "inline-block",
-                    whiteSpace: "nowrap",
-                    wordSpacing: lineWordSpacing,
-                  }}
-                >
-                  {text}
-                </span>
+                <React.Fragment key={idx}>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      whiteSpace: "nowrap",
+                      wordSpacing: lineWordSpacing,
+                    }}
+                  >
+                    {text}
+                  </span>
+                  <br />
+                </React.Fragment>
               );
             })
           : children}

@@ -47,7 +47,7 @@ export const CalculateWidths = React.memo<CalculateWidthProps>(
                 M
             </Box>
           </Box>
-        {unique(text.split("")).filter(l => l !== " ").map((letter, idx) => (
+        {unique(text.split(" ")).map((word, idx) => (
           <Box
             key={idx}
             position="absolute"
@@ -57,7 +57,7 @@ export const CalculateWidths = React.memo<CalculateWidthProps>(
               as="p"
               ref={(el) => {
                 if (el) {
-                  widths.set(letter, el.getBoundingClientRect().width);
+                  widths.set(word, el.getBoundingClientRect().width);
                 }
               }}
               fontFamily={fontFamily}
@@ -68,7 +68,7 @@ export const CalculateWidths = React.memo<CalculateWidthProps>(
               textAlign={textAlign}
               fontStyle={fontStyle}
             >
-              {letter}
+              {word}
             </Box>
           </Box>
         ))}

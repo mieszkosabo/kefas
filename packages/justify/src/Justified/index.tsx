@@ -10,22 +10,24 @@ export interface JustifiedProps extends BoxProps {
 
 export const Justified = ({ children, ...props }: JustifiedProps) => {
   const [widths, setWidths] = React.useState<WidthsMap | null>(null);
-  const { isJustified, lines } = useJustifiedText({ text: children });
+  const { isJustified, lines } = useJustifiedText({ text: children, widths });
 
-  console.log({ isJustified, lines });
+  console.log(isJustified);
   return (
-    <Box as="p" {...props}>
-      {isJustified
-        ? lines?.map((l, idx) => (
-            <span
-              key={idx}
-              style={{ display: "inline-block", whiteSpace: "nowrap" }}
-            >
-              {l}
-            </span>
-          ))
-        : children}
+    <>
+      <Box as="p" {...props}>
+        {isJustified
+          ? lines?.map((l, idx) => (
+              <span
+                key={idx}
+                style={{ display: "inline-block", whiteSpace: "nowrap" }}
+              >
+                {l}
+              </span>
+            ))
+          : children}
+      </Box>
       <CalculateWidths text={children} setWidths={setWidths} {...props} />
-    </Box>
+    </>
   );
 };

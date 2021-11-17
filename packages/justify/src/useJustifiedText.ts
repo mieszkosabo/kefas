@@ -1,6 +1,6 @@
 import * as React from "react";
 import { WidthsMap } from "./Justified";
-import { justify } from "./justify";
+import { justify } from "./justify/justify";
 
 export type UseJustifiedTextArgs = {
   text: string;

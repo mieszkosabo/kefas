@@ -1,27 +1,39 @@
 import * as React from "react";
-import { WidthsMap } from "./Justified";
-import { justify } from "./justify/justify";
+import { calculateLines, transformTextToSpecifications } from ".";
+import { findLineBreaks } from "./justify/knuthPlass";
+import { measure } from "./justify/measure";
 
 export type UseJustifiedTextArgs = {
   text: string;
-  widths: WidthsMap | null;
 };
 
 type UseJustifiedTextType = (args: UseJustifiedTextArgs) => {
-  lines: string[] | null;
+  lines: { text: string; wordSpacing: number }[] | null;
   isJustified: boolean;
+  ref: React.LegacyRef<HTMLParagraphElement>;
 };
 
-export const useJustifiedText: UseJustifiedTextType = ({ text, widths }) => {
-  const [lines, setLines] = React.useState<string[] | null>(null);
+export const useJustifiedText: UseJustifiedTextType = ({ text }) => {
+  const [lines, setLines] = React.useState<
+    | {
+        text: string;
+        wordSpacing: number;
+      }[]
+    | null
+  >(null);
+  const ref = React.useRef<HTMLParagraphElement>();
   React.useEffect(() => {
-    if (widths != null) {
-      setLines(justify(text, 42, widths));
+    if (ref.current) {
+      const specs = transformTextToSpecifications(text, measure(ref.current));
+      const breakpoints = findLineBreaks(specs, 320);
+      const calculatedLines = calculateLines(specs, 320, breakpoints);
+      setLines(calculatedLines);
     }
-  }, [text, widths]);
+  }, [text]);
 
   return {
     isJustified: lines != null,
     lines,
+    ref: ref as React.LegacyRef<HTMLParagraphElement>,
   };
 };

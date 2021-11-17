@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Box, BoxProps } from "@kefas-ui/system";
-import { CalculateWidths } from "../CalculateWidths";
 import { useJustifiedText } from "../useJustifiedText";
 
 export type WidthsMap = Map<string, number>;
@@ -9,25 +8,34 @@ export interface JustifiedProps extends BoxProps {
 }
 
 export const Justified = ({ children, ...props }: JustifiedProps) => {
-  const [widths, setWidths] = React.useState<WidthsMap | null>(null);
-  const { isJustified, lines } = useJustifiedText({ text: children, widths });
+  const { isJustified, lines, ref } = useJustifiedText({ text: children });
 
   console.log(isJustified);
   return (
     <>
-      <Box as="p" {...props}>
+      <Box ref={ref} as="p" {...props}>
         {isJustified
-          ? lines?.map((l, idx) => (
-              <span
-                key={idx}
-                style={{ display: "inline-block", whiteSpace: "nowrap" }}
-              >
-                {l}
-              </span>
-            ))
+          ? lines?.map(({ text, wordSpacing }, idx) => {
+              console.log(idx === lines.length - 1);
+              const lineWordSpacing =
+                idx === lines.length - 1 ? 0 : wordSpacing;
+              console.log(lineWordSpacing);
+              console.log(text);
+              return (
+                <span
+                  key={idx}
+                  style={{
+                    display: "inline-block",
+                    whiteSpace: "nowrap",
+                    wordSpacing: lineWordSpacing,
+                  }}
+                >
+                  {text}
+                </span>
+              );
+            })
           : children}
       </Box>
-      <CalculateWidths text={children} setWidths={setWidths} {...props} />
     </>
   );
 };

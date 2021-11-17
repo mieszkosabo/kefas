@@ -1,8 +1,33 @@
 import { FitnessClass, Node, Paragraph, Specification } from "../types";
 
-const TRESHOLD = 2;
-const FLAGGED_COST = 50;
-const FITNESS_COST = 3000;
+export const MIN_ADJUSTMENT_RATIO = -1;
+
+export type Config = {
+  maxAdjustmentRatio: number | null;
+  initialMaxAdjustmentRatio: number;
+  doubleHyphenPenalty: number;
+  contrastingTightnessPenalty: number;
+};
+
+const defaultConfig: Config = {
+  maxAdjustmentRatio: 2.0,
+  initialMaxAdjustmentRatio: 0.3,
+  doubleHyphenPenalty: 0,
+  contrastingTightnessPenalty: 0, // maybe larger
+};
+
+export const InfPenalty = 1024;
+export const minusInfPenalty = -1024;
+
+export const forcedBreak = (): Specification => ({
+  type: "penalty",
+  penalty: minusInfPenalty,
+  width: 0,
+  flagged: false,
+});
+
+const isForcedBreak = (spec: Specification) =>
+  spec.type === "penalty" && spec.penalty <= minusInfPenalty;
 
 const shouldRemoveNode = (ratio: number, spec: Specification) =>
   ratio < -1 || (spec.type === "penalty" && spec.penalty === -Infinity);
@@ -18,212 +43,255 @@ const computeFitnessClass = (ratio: number): FitnessClass => {
     return 3;
   }
 };
+
+type GlobalSums = {
+  width: number;
+  stretch: number;
+  shrink: number;
+};
+
+// TODO: update minAdjustmentRatio
+const computeRatio = (
+  node: Node,
+  spec: Specification,
+  globalSums: GlobalSums,
+  idealLineLength: number
+): number => {
+  const L = globalSums.width - node.totalWidth;
+  const lineLength = spec.type === "penalty" ? L + spec.width : L;
+
+  if (lineLength === idealLineLength) {
+    return 0;
+  }
+  if (lineLength < idealLineLength) {
+    const Y = globalSums.stretch - node.totalStretch;
+    return Y > 0 ? (idealLineLength - lineLength) / Y : Infinity;
+  } else {
+    const Z = globalSums.shrink - node.totalShrink;
+    return Z > 0 ? (idealLineLength - lineLength) / Z : Infinity;
+  }
+};
+
+const computeDemetrisAndFitnessClass = (
+  node: Node,
+  ratio: number,
+  spec: Specification,
+  input: Paragraph,
+  config: Config
+): [demetris: number, fitnessClass: FitnessClass] => {
+  let demetris: number;
+  if (spec.type === "penalty" && spec.penalty > 0) {
+    demetris = Math.pow(
+      1 + 100 * Math.pow(Math.abs(ratio), 3) + spec.penalty,
+      2
+    );
+  } else if (spec.type === "penalty" && spec.penalty !== -Infinity) {
+    demetris =
+      Math.pow(1 + 100 * Math.pow(Math.abs(ratio), 3), 2) -
+      Math.pow(spec.penalty, 2);
+  } else {
+    demetris = Math.pow(1 + 100 * Math.pow(Math.abs(ratio), 3), 2);
+  }
+
+  const nodeAtPos = input[node.position];
+  if (
+    spec.type === "penalty" &&
+    spec.flagged &&
+    nodeAtPos.type === "penalty" &&
+    nodeAtPos.flagged
+  ) {
+    demetris += config.doubleHyphenPenalty;
+  }
+
+  const fitnessClass = computeFitnessClass(ratio);
+
+  if (Math.abs(fitnessClass - node.fitness) > 1) {
+    demetris += config.contrastingTightnessPenalty;
+  }
+
+  return [demetris, fitnessClass];
+};
+
 // implementation of the Kunth-Plass line breaking algorithm
 // WORK IN PROGRESS
-export const justify = (input: Paragraph, paragraphLength: number) => {
+export const findLineBreaks = (
+  input: Paragraph,
+  idealLineLength: number,
+  config: Partial<Config> = {}
+): number[] => {
   const m = input.length;
-  let activeNode = new Node(0, 0, 1, 0, 0, 0, 0, null, null);
+  if (m === 0) {
+    return [];
+  }
+  const currentConfig = { ...defaultConfig, config };
+  const currentMaxAdjustmentRatio = Math.min(
+    currentConfig.initialMaxAdjustmentRatio,
+    currentConfig.maxAdjustmentRatio !== null
+      ? currentConfig.maxAdjustmentRatio
+      : Infinity
+  );
+  const active = new Set<Node>();
+  active.add({
+    position: 0,
+    line: 0,
+    fitness: 0,
+    totalWidth: 0,
+    totalStretch: 0,
+    totalShrink: 0,
+    totalDemerits: 0,
+    previous: null,
+  });
+
   const globalSums = {
     width: 0,
     stretch: 0,
     shrink: 0,
   };
 
-  const computeRatio = (node: Node, spec: Specification): number => {
-    const L = globalSums.width - node.totalWidth;
-    const lineLength = spec.type === "penalty" ? L + spec.width : L;
-    console.log({ L, lineLength });
-    if (lineLength === paragraphLength) {
-      return 0;
-    }
-    if (lineLength < paragraphLength) {
-      const Y = globalSums.stretch - node.totalStretch;
-      return Y > 0 ? (paragraphLength - lineLength) / Y : Infinity;
-    } else {
-      const Z = globalSums.shrink - node.totalShrink;
-      return Z > 0 ? (paragraphLength - lineLength) / Z : Infinity;
-    }
-  };
-
-  const computeDemetrisAndFitnessClass = (
-    node: Node,
-    ratio: number,
-    spec: Specification
-  ): [demetris: number, fitnessClass: FitnessClass] => {
-    let demetris: number;
-    if (spec.type === "penalty" && spec.penalty > 0) {
-      demetris = Math.pow(
-        1 + 100 * Math.pow(Math.abs(ratio), 3) + spec.penalty,
-        2
-      );
-    } else if (spec.type === "penalty" && spec.penalty !== -Infinity) {
-      demetris =
-        Math.pow(1 + 100 * Math.pow(Math.abs(ratio), 3), 2) -
-        Math.pow(spec.penalty, 2);
-    } else {
-      demetris = Math.pow(1 + 100 * Math.pow(Math.abs(ratio), 3), 2);
-    }
-
-    const nodeAtPos = input[node.position];
-    if (
-      spec.type === "penalty" &&
-      spec.flagged &&
-      nodeAtPos.type === "penalty" &&
-      nodeAtPos.flagged
-    ) {
-      demetris += FLAGGED_COST;
-    }
-
-    const fitnessClass = computeFitnessClass(ratio);
-
-    if (Math.abs(fitnessClass - node.fitness) > 1) {
-      demetris += FITNESS_COST;
-    }
-
-    return [demetris, fitnessClass];
-  };
-
-  const computeTotals = (startIdx: number) => {
-    const totals = {
-      tw: globalSums.width,
-      ty: globalSums.stretch,
-      tz: globalSums.shrink,
-    };
-    for (let i = startIdx; i < m; i++) {
-      const currSpec = input[i];
-      if (currSpec.type === "box") {
-        break;
-      }
-      if (currSpec.type === "glue") {
-        totals.tw += currSpec.width;
-        totals.ty += currSpec.stretchability;
-        totals.tz += currSpec.shrinkability;
-      } else if (currSpec.penalty === -Infinity && i > startIdx) {
-        break;
-      }
-    }
-    return totals;
-  };
-
-  const mainLoop = (spec: Specification, idx: number) => {
-    let currentActiveNode: Node | null = activeNode;
-    let preva: Node | null = null;
-
-    outer: while (currentActiveNode != null) {
-      const demetria = [
-        Infinity, // D_0
-        Infinity, // D_1
-        Infinity, // D_2
-        Infinity, // D_3
-      ];
-      const bestActiveNodes: (Node | null)[] = [null, null, null, null];
-      let bestDemetris = -Infinity;
-
-      inner: while (currentActiveNode != null) {
-        const nexta: Node | null = currentActiveNode.next;
-        const currentLine = currentActiveNode.line + 1;
-        console.log(idx);
-        const ratio = computeRatio(currentActiveNode, spec);
-
-        if (shouldRemoveNode(ratio, spec)) {
-          currentActiveNode = currentActiveNode.remove();
-        } else {
-          preva = currentActiveNode;
-        }
-        if (ratio >= -1 && ratio <= TRESHOLD) {
-          const [demetris, currentFitness] = computeDemetrisAndFitnessClass(
-            currentActiveNode as Node, // FIXME:
-            ratio,
-            spec
-          );
-
-          if (demetris < demetria[currentFitness]) {
-            demetria[currentFitness] = demetris;
-            bestActiveNodes[currentFitness] = currentActiveNode;
-            if (demetris < bestDemetris) {
-              bestDemetris = demetris;
-            }
-          }
-        }
-
-        currentActiveNode = nexta;
-
-        if (
-          currentActiveNode != null &&
-          currentActiveNode.line >= currentLine
-        ) {
-          break inner;
-        }
-      }
-
-      if (bestDemetris < Infinity) {
-        // insert new active nodes for breaks from Ac to b
-        const { tw, ty, tz } = computeTotals(idx);
-        for (let fitnessClass = 0; fitnessClass <= 3; fitnessClass += 1) {
-          const dc = demetria[fitnessClass];
-          if (dc <= bestDemetris + FLAGGED_COST) {
-            const newNode = new Node(
-              idx,
-              bestActiveNodes[fitnessClass]!.line + 1,
-              fitnessClass as FitnessClass,
-              tw,
-              ty,
-              tz,
-              dc,
-              currentActiveNode,
-              bestActiveNodes[fitnessClass]
-            );
-            if (preva == null) {
-              activeNode = newNode;
-            } else {
-              preva.next = newNode;
-            }
-            preva = newNode;
-          }
-        }
-      }
-    }
-  };
+  const minAdjusementRatioAboveTreshold = Infinity;
 
   for (let b = 0; b < m; b++) {
     const currEl = input[b];
 
+    if (currEl.width < 0) {
+      throw new Error(`Element with index ${b} has negative width`);
+    }
+
+    let canBreak = false;
     if (currEl.type === "box") {
       globalSums.width += currEl.width;
     } else if (currEl.type === "glue") {
-      if (input[b - 1].type === "box") {
-        mainLoop(currEl, b);
+      if (currEl.shrinkability < 0 || currEl.stretchability < 0) {
+        throw new Error(
+          `Item with index ${b} has negative stretchability or shrinkability`
+        );
       }
+
+      canBreak = b > 0 && input[b - 1].type === "box";
+      if (!canBreak) {
+        globalSums.width += currEl.width;
+        globalSums.stretch += currEl.stretchability;
+        globalSums.shrink += currEl.shrinkability;
+      }
+    } else {
+      canBreak = currEl.penalty < InfPenalty;
+    }
+    if (!canBreak) {
+      continue;
+    }
+
+    // MAIN LOOP
+
+    let lastActive: Node | null = null;
+    const feasibleLinebreaks: Node[] = [];
+
+    active.forEach((a) => {
+      const adjustementRatio = computeRatio(
+        a,
+        currEl,
+        globalSums,
+        idealLineLength
+      );
+
+      if (adjustementRatio < MIN_ADJUSTMENT_RATIO || isForcedBreak(currEl)) {
+        active.delete(a);
+        lastActive = a;
+      }
+      if (
+        adjustementRatio >= MIN_ADJUSTMENT_RATIO &&
+        adjustementRatio <= currentMaxAdjustmentRatio
+      ) {
+        // TODO: change TRESHOLD TO CURRENT MIN ADJUSTEMETN RATIO
+        const [demetris, currentFitness] = computeDemetrisAndFitnessClass(
+          a,
+          adjustementRatio,
+          currEl,
+          input,
+          currentConfig
+        );
+
+        const sumsToNextBox = {
+          width: 0,
+          stretch: 0,
+          shrink: 0,
+        };
+        for (let bp = b; bp < m; bp++) {
+          const spec = input[bp];
+          if (spec.type === "box") {
+            break;
+          }
+          if (spec.type === "penalty" && spec.penalty >= InfPenalty) {
+            // TODO: add fun for this check
+            break;
+          }
+          sumsToNextBox.width += spec.width;
+          if (spec.type === "glue") {
+            sumsToNextBox.shrink += spec.shrinkability;
+            sumsToNextBox.stretch += spec.stretchability;
+          }
+        }
+
+        feasibleLinebreaks.push({
+          position: b,
+          line: a.line + 1,
+          fitness: currentFitness,
+          totalWidth: globalSums.width + sumsToNextBox.width,
+          totalShrink: globalSums.shrink + sumsToNextBox.shrink,
+          totalStretch: globalSums.stretch + sumsToNextBox.stretch,
+          totalDemerits: a.totalDemerits + demetris,
+          previous: a,
+        });
+      }
+    });
+
+    // TODO: refactor
+    if (feasibleLinebreaks.length > 0) {
+      let bestNode = feasibleLinebreaks[0];
+      for (const f of feasibleLinebreaks) {
+        if (f.totalDemerits < bestNode.totalDemerits) {
+          bestNode = f;
+        }
+      }
+      active.add(bestNode);
+    }
+
+    if (active.size === 0) {
+      // TODO: retry with different minAdjustementRatioAboveTreshold
+
+      active.add({
+        position: b,
+        line: lastActive!.line + 1,
+        fitness: 1,
+        totalWidth: globalSums.width,
+        totalShrink: globalSums.shrink,
+        totalStretch: globalSums.stretch,
+        totalDemerits: lastActive!.totalDemerits + 1024,
+        previous: lastActive,
+      });
+    }
+
+    if (currEl.type === "glue") {
       globalSums.width += currEl.width;
       globalSums.stretch += currEl.stretchability;
       globalSums.shrink += currEl.shrinkability;
-    } else {
-      if (currEl.penalty !== Infinity) {
-        mainLoop(currEl, b);
-      }
-    }
-  }
-  const result = [];
-  let d = Infinity;
-  let a: Node | null = activeNode;
-  let best: Node | null = activeNode;
-  while (true) {
-    console.log(a);
-    a = a.next;
-    if (a == null) {
-      break;
-    }
-    if (a.totalDemerits < d) {
-      d = a.totalDemerits;
-      best = a;
     }
   }
 
-  while (best != null) {
-    result.push({ position: best.position }); // TODO: add ratios prolly
-    best = best.previous;
+  let bestNode: Node | null = null;
+  active.forEach((a) => {
+    if (!bestNode || a.totalDemerits < bestNode.totalDemerits) {
+      bestNode = a;
+    }
+  });
+
+  const result = [];
+  let next: Node | null = bestNode!;
+
+  while (next) {
+    result.push(next.position);
+    next = next.previous;
   }
+
   result.reverse();
-  console.log(globalSums);
   return result;
 };

@@ -1,5 +1,3 @@
-// WORKS ONLY FOR MONOTYPES WITHOUT HYPHENS
-
 import { WidthsMap } from "../Justified";
 
 type PossibleLineBreak = {

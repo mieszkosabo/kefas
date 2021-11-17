@@ -9,7 +9,7 @@ export default {
 
 export const Example = () => (
   <>
-    <Box as="p" w="20rem" fontFamily="monospace">
+    <Box as="p" w="20rem" fontFamily="monospace" textAlign="justify">
       So Hansel and Grethel sat by the fire, and at noon they each ate their
       pieces of bread. They thought their father was in the wood all the time,
       as they seemed to hear the strokes of the axe: but really it was only a

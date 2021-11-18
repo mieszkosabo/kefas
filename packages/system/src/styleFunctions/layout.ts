@@ -34,6 +34,15 @@ export const layoutConfig: Config = {
     scale: "sizes",
     transform: transformRawValueToPixelOrPercent,
   },
+  size: {
+    properties: ["width", "height"],
+    scale: "sizes",
+  },
+  overflow: true,
+  overflowX: true,
+  overflowY: true,
+  display: true,
+  verticalAlign: true,
 };
 layoutConfig.w = layoutConfig.width;
 layoutConfig.h = layoutConfig.height;
@@ -60,6 +69,13 @@ export type LayoutProps = Partial<{
 
   maxHeight: Token<CSSTypes.Property.MaxHeight | number, "sizes">;
   maxH: Token<CSSTypes.Property.MaxHeight | number, "sizes">;
+
+  size: Token<CSSTypes.Property.Width | number, "sizes">;
+  overflow: Token<CSSTypes.Property.Overflow>;
+  overflowX: Token<CSSTypes.Property.OverflowX>;
+  overflowY: Token<CSSTypes.Property.OverflowY>;
+  display: Token<CSSTypes.Property.Display>;
+  verticalAlign: Token<CSSTypes.Property.VerticalAlign>;
 }>;
 
 export const layout = system(layoutConfig);

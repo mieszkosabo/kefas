@@ -1,5 +1,3 @@
-export type SpecificationType = "box" | "glue" | "penalty";
-
 export type Specification =
   | {
       type: "box";
@@ -32,59 +30,3 @@ export interface Node {
   totalDemerits: number;
   previous: Node | null;
 }
-
-// export class Node {
-//   position: number;
-
-//   line: number;
-
-//   fitness: FitnessClass;
-
-//   totalWidth: number;
-
-//   totalStretch: number;
-
-//   totalShrink: number;
-
-//   totalDemerits: number;
-
-//   next: Node | null;
-
-//   previous: Node | null;
-
-//   constructor(
-//     position: number,
-//     line: number,
-//     fitness: FitnessClass,
-//     totalWidth: number,
-//     totalStretch: number,
-//     totalShrink: number,
-//     totalDemerits: number,
-//     next: Node | null,
-//     previous: Node | null
-//   ) {
-//     this.position = position;
-//     this.line = line;
-//     this.fitness = fitness;
-//     this.totalWidth = totalWidth;
-//     this.totalStretch = totalStretch;
-//     this.totalShrink = totalShrink;
-//     this.totalDemerits = totalDemerits;
-//     this.next = next;
-//     this.previous = previous;
-//   }
-
-//   remove() {
-//     if (this.previous === null) {
-//       if (this.next !== null) {
-//         this.next.previous = null;
-//       }
-//       return this.next;
-//     }
-//     this.previous.next = this.next;
-//     if (this.next !== null) {
-//       this.next.previous = this.previous;
-//     }
-//     return this.next;
-//   }
-// }

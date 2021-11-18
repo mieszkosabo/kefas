@@ -30,3 +30,5 @@ export const measure = (context: Element) => (text: string) => {
   const width = measureText(font, text);
   return width;
 };
+
+// TODO: add cache'ing

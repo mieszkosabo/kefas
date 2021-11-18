@@ -29,9 +29,6 @@ export const forcedBreak = (): Specification => ({
 const isForcedBreak = (spec: Specification) =>
   spec.type === "penalty" && spec.penalty <= minusInfPenalty;
 
-const shouldRemoveNode = (ratio: number, spec: Specification) =>
-  ratio < -1 || (spec.type === "penalty" && spec.penalty === -Infinity);
-
 const computeFitnessClass = (ratio: number): FitnessClass => {
   if (ratio < -0.5) {
     return 0;

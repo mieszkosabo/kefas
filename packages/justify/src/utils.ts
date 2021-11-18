@@ -1,8 +1,4 @@
-import {
-  forcedBreak,
-  InfPenalty,
-  MIN_ADJUSTMENT_RATIO,
-} from "./justify/knuthPlass";
+import { forcedBreak, InfPenalty } from "./justify/knuthPlass";
 import { Paragraph, SpecificationWithText } from "./types";
 
 export type MeasureFunction = (word: string) => number;
@@ -149,7 +145,6 @@ export const calculateLines = (
   for (let i = 0; i < breakpoints.length - 1; i++) {
     const items = getItemsForBreakpoint(i, breakpoints, input);
     const wordSpacing = calculateLineSpacing(items, lineLength);
-    console.log({ items });
     result.push({
       text: items.map(({ text }) => (text != null ? text : "")).join(""),
       wordSpacing,

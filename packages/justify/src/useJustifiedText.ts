@@ -7,11 +7,17 @@ export type UseJustifiedTextArgs = {
   text: string;
 };
 
-type UseJustifiedTextType = (args: UseJustifiedTextArgs) => {
-  lines: { text: string; wordSpacing: number }[] | null;
-  isJustified: boolean;
-  ref: React.LegacyRef<HTMLParagraphElement>;
-};
+export type UseJustifiedTextType = (args: UseJustifiedTextArgs) =>
+  | {
+      lines: null;
+      isJustified: false;
+      ref: React.LegacyRef<HTMLParagraphElement>;
+    }
+  | {
+      lines: { text: string; wordSpacing: number }[];
+      isJustified: true;
+      ref: React.LegacyRef<HTMLParagraphElement>;
+    };
 
 export const useJustifiedText: UseJustifiedTextType = ({ text }) => {
   const [lines, setLines] = React.useState<
@@ -31,9 +37,15 @@ export const useJustifiedText: UseJustifiedTextType = ({ text }) => {
     }
   }, [text]);
 
-  return {
-    isJustified: lines != null,
-    lines,
-    ref: ref as React.LegacyRef<HTMLParagraphElement>,
-  };
+  return lines === null
+    ? {
+        isJustified: false,
+        lines: null,
+        ref: ref as React.LegacyRef<HTMLParagraphElement>,
+      }
+    : {
+        isJustified: true,
+        lines,
+        ref: ref as React.LegacyRef<HTMLParagraphElement>,
+      };
 };

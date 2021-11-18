@@ -20,6 +20,8 @@ export type Paragraph = Specification[];
 
 export type FitnessClass = 0 | 1 | 2 | 3;
 
+export type MeasureFunction = (word: string) => number;
+export type HyphenateFunction = (word: string) => string[];
 export interface Node {
   position: number;
   line: number;

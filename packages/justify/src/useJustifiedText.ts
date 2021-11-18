@@ -1,7 +1,10 @@
 import * as React from "react";
-import { calculateLines, transformTextToSpecifications } from ".";
-import { findLineBreaks } from "./justify/knuthPlass";
-import { measure } from "./justify/measure";
+import { findLineBreaks } from "./algorithms/findLineBreaks";
+import {
+  calculateLines,
+  transformTextToSpecifications,
+} from "./algorithms/transformations";
+import { measure } from "./measure";
 
 export type UseJustifiedTextArgs = {
   text: string;

@@ -1,10 +1,9 @@
-import { findLineBreaks } from "../src/justify/knuthPlass";
+import { findLineBreaks } from "../src/algorithms/findLineBreaks";
 import { Paragraph } from "../src/types";
 import {
   calculateLines,
   getItemsForBreakpoint,
-  transformTextToSpecifications,
-} from "../src/utils";
+} from "../src/algorithms/transformations";
 import { testParagraph } from "./testParagraph";
 
 it("returns paragraph", () => {

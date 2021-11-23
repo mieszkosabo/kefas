@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-loop-func */
 import { FitnessClass, Node, Paragraph, Specification } from "../types";
 
 export const MIN_ADJUSTMENT_RATIO = -1;
+export class MaxAdjustmentRatioExceeded extends Error {}
 
 export type Config = {
   maxAdjustmentRatio: number | null;
@@ -145,7 +147,7 @@ export const findLineBreaks = (
     shrink: 0,
   };
 
-  const minAdjusementRatioAboveTreshold = Infinity;
+  let minAdjusementRatioAboveTreshold = Infinity;
 
   for (let b = 0; b < m; b++) {
     const currEl = input[b];
@@ -190,6 +192,11 @@ export const findLineBreaks = (
         idealLineLength
       );
 
+      minAdjusementRatioAboveTreshold = Math.min(
+        adjustementRatio,
+        minAdjusementRatioAboveTreshold
+      );
+
       if (adjustementRatio < MIN_ADJUSTMENT_RATIO || isForcedBreak(currEl)) {
         active.delete(a);
         lastActive = a;
@@ -198,7 +205,6 @@ export const findLineBreaks = (
         adjustementRatio >= MIN_ADJUSTMENT_RATIO &&
         adjustementRatio <= currentMaxAdjustmentRatio
       ) {
-        // TODO: change TRESHOLD TO CURRENT MIN ADJUSTEMETN RATIO
         const [demetris, currentFitness] = computeDemetrisAndFitnessClass(
           a,
           adjustementRatio,
@@ -253,18 +259,28 @@ export const findLineBreaks = (
     }
 
     if (active.size === 0) {
-      // TODO: retry with different minAdjustementRatioAboveTreshold
+      if (isFinite(minAdjusementRatioAboveTreshold)) {
+        if (currentConfig.maxAdjustmentRatio === currentMaxAdjustmentRatio) {
+          throw new MaxAdjustmentRatioExceeded();
+        }
 
-      active.add({
-        position: b,
-        line: lastActive!.line + 1,
-        fitness: 1,
-        totalWidth: globalSums.width,
-        totalShrink: globalSums.shrink,
-        totalStretch: globalSums.stretch,
-        totalDemerits: lastActive!.totalDemerits + 1024,
-        previous: lastActive,
-      });
+        // retry with larger threshold
+        return findLineBreaks(input, idealLineLength, {
+          ...config,
+          initialMaxAdjustmentRatio: minAdjusementRatioAboveTreshold * 2,
+        });
+      } else {
+        active.add({
+          position: b,
+          line: lastActive!.line + 1,
+          fitness: 1,
+          totalWidth: globalSums.width,
+          totalShrink: globalSums.shrink,
+          totalStretch: globalSums.stretch,
+          totalDemerits: lastActive!.totalDemerits + 1024,
+          previous: lastActive,
+        });
+      }
     }
 
     if (currEl.type === "glue") {

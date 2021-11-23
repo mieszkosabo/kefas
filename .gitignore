@@ -100,3 +100,5 @@ yarn-error.log
 .yarn-integrity
 
 report.*
+
+!packages/justify/typings/*.d.ts

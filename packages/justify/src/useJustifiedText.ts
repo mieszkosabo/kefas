@@ -1,13 +1,19 @@
 import * as React from "react";
-import { findLineBreaks } from "./algorithms/findLineBreaks";
+import { findLineBreaks, Config } from "./algorithms/findLineBreaks";
 import {
   calculateLines,
   transformTextToSpecifications,
 } from "./algorithms/transformations";
 import { measure } from "./measure";
+import enUsPatterns from 'hyphenation.en-us';
+import { createHypenator } from "./hyphenate";
+import { Patterns } from "hypher";
 
 export type UseJustifiedTextArgs = {
   text: string;
+  hypenate?: boolean;
+  patterns?: Patterns;
+  config?: Partial<Config>
 };
 
 export type UseJustifiedTextType = (args: UseJustifiedTextArgs) =>
@@ -22,7 +28,7 @@ export type UseJustifiedTextType = (args: UseJustifiedTextArgs) =>
       ref: React.LegacyRef<HTMLParagraphElement>;
     };
 
-export const useJustifiedText: UseJustifiedTextType = ({ text }) => {
+export const useJustifiedText: UseJustifiedTextType = ({ text, patterns, hypenate = true, config = {} }) => {
   const [lines, setLines] = React.useState<
     | {
         text: string;
@@ -31,10 +37,11 @@ export const useJustifiedText: UseJustifiedTextType = ({ text }) => {
     | null
   >(null);
   const ref = React.useRef<HTMLParagraphElement>();
+  const hyphenFn = createHypenator(patterns ?? enUsPatterns);
   React.useEffect(() => {
     if (ref.current) {
-      const specs = transformTextToSpecifications(text, measure(ref.current));
-      const breakpoints = findLineBreaks(specs, 320);
+      const specs = transformTextToSpecifications(text, measure(ref.current), hypenate ? hyphenFn : undefined);
+      const breakpoints = findLineBreaks(specs, 320, config);
       const calculatedLines = calculateLines(specs, 320, breakpoints);
       setLines(calculatedLines);
     }

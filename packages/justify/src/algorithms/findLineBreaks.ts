@@ -12,7 +12,7 @@ export type Config = {
 const defaultConfig: Config = {
   maxAdjustmentRatio: 2.0,
   initialMaxAdjustmentRatio: 1,
-  doubleHyphenPenalty: 0,
+  doubleHyphenPenalty: 50,
   contrastingTightnessPenalty: 50,
 };
 
@@ -120,7 +120,7 @@ export const findLineBreaks = (
   if (m === 0) {
     return [];
   }
-  const currentConfig = { ...defaultConfig, config };
+  const currentConfig = { ...defaultConfig, ...config };
   const currentMaxAdjustmentRatio = Math.min(
     currentConfig.initialMaxAdjustmentRatio,
     currentConfig.maxAdjustmentRatio !== null

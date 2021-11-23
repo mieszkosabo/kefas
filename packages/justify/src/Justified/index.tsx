@@ -1,13 +1,18 @@
 import * as React from "react";
 import { Box, BoxProps } from "@kefas-ui/system";
 import { useJustifiedText } from "../useJustifiedText";
+import { Patterns } from "hypher";
+import { Config } from "..";
 
 export interface JustifiedProps extends BoxProps {
   children: string;
+  hyphenatePatterns?: Patterns;
+  hypenate?: boolean;
+  config?: Partial<Config>
 }
 
-export const Justified = ({ children, ...props }: JustifiedProps) => {
-  const { isJustified, lines, ref } = useJustifiedText({ text: children });
+export const Justified = ({ children, hyphenatePatterns, hypenate, config,  ...props }: JustifiedProps) => {
+  const { isJustified, lines, ref } = useJustifiedText({ text: children, hypenate, patterns: hyphenatePatterns, config });
 
   return (
     <Box

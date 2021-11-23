@@ -113,13 +113,18 @@ export const calculateLines = (
 ) => {
   const result = [];
   for (let i = 0; i < breakpoints.length - 1; i++) {
-    const isHyphen = input[breakpoints[i + 1]]?.type === 'penalty' && i + 1 < breakpoints.length - 1;
+    const isHyphen =
+      input[breakpoints[i + 1]]?.type === "penalty" &&
+      i + 1 < breakpoints.length - 1;
     const items = getItemsForBreakpoint(i, breakpoints, input);
     const wordSpacing = calculateLineSpacing(items, lineLength);
 
-    const text = items.map(({ text }) => (text != null ? text : "")).join("");
+    const lineText = items
+      .map(({ text }) => (text != null ? text : ""))
+      .join("");
+
     result.push({
-      text: isHyphen ? text + '-' : text,
+      text: isHyphen ? lineText + "-" : lineText,
       wordSpacing,
     });
   }

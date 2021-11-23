@@ -8,11 +8,22 @@ export interface JustifiedProps extends BoxProps {
   children: string;
   hyphenatePatterns?: Patterns;
   hypenate?: boolean;
-  config?: Partial<Config>
+  config?: Partial<Config>;
 }
 
-export const Justified = ({ children, hyphenatePatterns, hypenate, config,  ...props }: JustifiedProps) => {
-  const { isJustified, lines, ref } = useJustifiedText({ text: children, hypenate, patterns: hyphenatePatterns, config });
+export const Justified = ({
+  children,
+  hyphenatePatterns,
+  hypenate,
+  config,
+  ...props
+}: JustifiedProps) => {
+  const { isJustified, lines, ref } = useJustifiedText({
+    text: children,
+    hypenate,
+    patterns: hyphenatePatterns,
+    config,
+  });
 
   return (
     <Box

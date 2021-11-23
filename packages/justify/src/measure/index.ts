@@ -25,10 +25,31 @@ const getFontFromElement = (el: Element) => {
   return font;
 };
 
-export const measure = (context: Element) => (text: string) => {
-  const font = getFontFromElement(context);
-  const width = measureText(font, text);
-  return width;
+const createMeasureFunction = () => {
+  const fontsCache: Map<Element, string> = new Map();
+  const widthsCache: Map<string, Map<string, number>> = new Map();
+
+  return (context: Element) => (text: string) => {
+    let font = fontsCache.get(context);
+    if (!font) {
+      font = getFontFromElement(context);
+      fontsCache.set(context, font);
+    }
+
+    let widths = widthsCache.get(font);
+    if (!widths) {
+      widths = new Map();
+      widthsCache.set(font, widths);
+    }
+
+    let width = widths.get(text);
+    if (!width) {
+      width = measureText(font, text);
+      widths.set(text, width);
+    }
+
+    return width;
+  };
 };
 
-// TODO: add cache'ing
+export const measure = createMeasureFunction();

@@ -40,9 +40,10 @@ export const useJustifiedText: UseJustifiedTextType = ({ text, patterns, hypenat
   const hyphenFn = createHypenator(patterns ?? enUsPatterns);
   React.useEffect(() => {
     if (ref.current) {
+        const paragraphWidth = ref.current.getBoundingClientRect().width;
         const specs = transformTextToSpecifications(text, measure(ref.current), hypenate ? hyphenFn : undefined);
-        const breakpoints = findLineBreaks(specs, 320, config);
-        const calculatedLines = calculateLines(specs, 320, breakpoints);
+        const breakpoints = findLineBreaks(specs, paragraphWidth, config);
+        const calculatedLines = calculateLines(specs, paragraphWidth, breakpoints);
         setLines(calculatedLines);
     }
   }, [text]);

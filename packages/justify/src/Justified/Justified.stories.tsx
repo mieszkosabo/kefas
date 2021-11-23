@@ -71,5 +71,45 @@ export const Example = () => (
         Dymnymi.
       </Justified>
     </Flex>
+    -------------------
+    <p>chrome below</p>
+    <Box as="p" w="40rem" fontFamily="Georgia" textAlign="justify">
+      W innych okolicach kraju rody brały nazwę od zaścianków albo zaścianki od
+      rodów jako bywało na Podlasiu; tam zaś, wzdłuż laudańskiego porzecza, było
+      inaczej. Tam mieszkali w Morezach Stakjanowie, których swego czasu Batory
+      osadził za męstwo okazane pod Pskowem. W Wołmontowiczach na dobrej glebie
+      roili się Butrymowie, najdłuższe chłopy z całej Laudy, słynni z
+      małomówności i ciężkiej ręki, którzy czasu sejmików, zajazdów lub wojen
+      murem w milczeniu iść zwykli. Ziemie w Drożejkanach i Mozgach uprawiali
+      liczni Domaszewiczowie, słynni myśliwi; ci puszczą Zielonką aż do
+      Wiłkomierza tropem niedźwiedzim chadzali. Gasztowtowie siedzieli w
+      Pacunelach; panny ich słynęły pięknością, tak iż w końcu wszystkie gładkie
+      dziewczęta w okolicy Krakinowa, Poniewieża i Upity pacunelkami nazywano.
+      Sołłohubowie Mali byli bogaci w konie i bydło wyborne, na leśnych
+      pastwiskach hodowane; zaś Gościewicze w Goszczunach smołę w lasach
+      pędzili, od którego zajęcia zwano ich Gościewiczami Czarnymi albo Dymnymi.
+    </Box>
+    <p>Justified below</p>
+    <Justified
+      w="40rem"
+      fontFamily="Georgia"
+      hyphenatePatterns={polishPatterns}
+      config={{ doubleHyphenPenalty: 500 }}
+    >
+      W innych okolicach kraju rody brały nazwę od zaścianków albo zaścianki od
+      rodów jako bywało na Podlasiu; tam zaś, wzdłuż laudańskiego porzecza, było
+      inaczej. Tam mieszkali w Morezach Stakjanowie, których swego czasu Batory
+      osadził za męstwo okazane pod Pskowem. W Wołmontowiczach na dobrej glebie
+      roili się Butrymowie, najdłuższe chłopy z całej Laudy, słynni z
+      małomówności i ciężkiej ręki, którzy czasu sejmików, zajazdów lub wojen
+      murem w milczeniu iść zwykli. Ziemie w Drożejkanach i Mozgach uprawiali
+      liczni Domaszewiczowie, słynni myśliwi; ci puszczą Zielonką aż do
+      Wiłkomierza tropem niedźwiedzim chadzali. Gasztowtowie siedzieli w
+      Pacunelach; panny ich słynęły pięknością, tak iż w końcu wszystkie gładkie
+      dziewczęta w okolicy Krakinowa, Poniewieża i Upity pacunelkami nazywano.
+      Sołłohubowie Mali byli bogaci w konie i bydło wyborne, na leśnych
+      pastwiskach hodowane; zaś Gościewicze w Goszczunach smołę w lasach
+      pędzili, od którego zajęcia zwano ich Gościewiczami Czarnymi albo Dymnymi.
+    </Justified>
   </>
 );
